@@ -105,11 +105,13 @@ input.mark:disabled{background:#e5e7eb}
 <div class="row"><div><input type="file" id="tFile" accept=".xlsx,.xls,.csv"></div>
 <div style="display:flex;gap:8px"><button class="btn" onclick="uploadTeachers()">আপলোড</button><button class="btn ghost" onclick="downloadTeacherTemplate()">টেমপ্লেট ডাউনলোড</button></div></div>
 <hr style="margin:24px 0;border:0;border-top:1px solid var(--line)">
-<b>শিক্ষক যোগ করুন (একজন)</b><div class="row">
-<div><label>নাম</label><input id="tName"></div><div><label>শ্রেণি (ফাঁকা = সব)</label><input id="tClass"></div>
-<div><label>বিষয় (হুবহু)</label><input id="tSubj"></div><div><label>ইউজারনেম</label><input id="tUser"></div>
-<div><label>পাসওয়ার্ড (≥৬)</label><input id="tPass"></div></div>
-<div style="margin-top:12px"><button class="btn" onclick="addTeacher()">শিক্ষক তৈরি</button></div><div id="teacherMsg" class="msg"></div></div>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><b>👩‍🏫 শিক্ষক তালিকা</b><button class="btn" onclick="openTeacherForm()">＋ নতুন শিক্ষক</button></div>
+<div id="teacherForm" class="card hidden" style="background:#f8fafc;margin-top:10px"><b id="tFormTitle">নতুন শিক্ষক</b><div class="row">
+<div><label>নাম</label><input id="tName"></div><div><label>শ্রেণি (ফাঁকা = সব, যেমন 9,10)</label><input id="tClass"></div>
+<div><label>বিষয় (হুবহু)</label><input id="tSubj"></div><div><label>ইউজারনেম (ইংরেজিতে)</label><input id="tUser"></div>
+<div><label>পাসওয়ার্ড (≥৬)</label><input id="tPass"></div></div><p class="muted" id="tFormNote"></p>
+<div style="margin-top:8px;display:flex;gap:8px"><button class="btn" onclick="saveTeacherForm()">সংরক্ষণ</button><button class="btn ghost" onclick="closeTeacherForm()">বাতিল</button></div></div>
+<div id="teacherMsg" class="msg"></div><div id="teacherList" style="margin-top:10px"></div></div>
 </div></div>
 
 <footer class="main-footer no-print">© 2026 হেসাখাল বাজার হাই-স্কুল। সর্বস্বত্ব সংরক্ষিত। | Powered by ManHaIT</footer>
@@ -118,7 +120,7 @@ input.mark:disabled{background:#e5e7eb}
 import {firebaseConfig} from './firebase-config.js';
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import {getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged,createUserWithEmailAndPassword} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import {getFirestore,doc,getDoc,setDoc,getDocs,collection,query,where,writeBatch} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import {getFirestore,doc,getDoc,setDoc,getDocs,collection,query,where,writeBatch,deleteDoc} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
 const DOMAIN='hbhs.app';
 const SCHOOL={name:'হেসাখাল বাজার হাই-স্কুল',logo:'https://i.im.ge/QMCgKBW/school_logo.jpg',
@@ -225,7 +227,7 @@ function startApp(){
  ['mExam','rExam','meExam','bpExam','fExam'].forEach(x=>fill(x,EXAMS,'key','label'));
  if(!isAdmin()&&USER.klass){const ks=String(USER.klass).split(/[,\s]+/).map(Number).filter(n=>CLASSES.includes(n));if(ks.length){fill('mClass',ks);['rClass','meClass'].forEach(x=>$(x).value=ks[0])}}
  onMeClass();selectTab('tabMarks',tc.children[0]);showScreen('screenApp')}
-function selectTab(id,el){document.querySelectorAll('.tabpane').forEach(t=>t.classList.add('hidden'));$(id).classList.remove('hidden');
+function selectTab(id,el){if(id==='tabSetup')loadTeachers();document.querySelectorAll('.tabpane').forEach(t=>t.classList.add('hidden'));$(id).classList.remove('hidden');
  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));if(el)el.classList.add('active')}
 
 /* ===== নম্বর এন্ট্রি (পূর্ণমানের বেশি হলে লাল + অ্যালার্ট) ===== */
@@ -326,14 +328,41 @@ async function loadFull(){const k=+$('fClass').value,e=$('fExam').value,f=await 
  $('fullArea').innerHTML='<div class="scroll"><table><tbody>'+cols(k).cols.map(c=>`<tr><td class="name">${esc(c.label)}</td><td><input class="mark" type="number" min="0" data-c="${c.id}" value="${f[c.id]}"></td></tr>`).join('')+'</tbody></table></div><div style="margin-top:12px"><button class="btn" onclick="saveFull()">পূর্ণমান সংরক্ষণ</button></div>'}
 async function saveFull(){const k=$('fClass').value,e=$('fExam').value,o={};document.querySelectorAll('#fullArea input').forEach(i=>o[i.dataset.c]=Number(i.value)||0);
  await setDoc(doc(db,'fullmarks',k+'_'+e),o);msg('fullMsg','পূর্ণমান সংরক্ষিত।','ok')}
+const dupErr=()=>{const x=new Error('ইউজারনেম আগে থেকেই আছে');x.code='auth/email-already-in-use';return x};
 async function createTeacher(t){
- const u=String(t.username).trim().toLowerCase().replace('@'+DOMAIN,''),pw=String(t.password);
- const sec=initializeApp(firebaseConfig,'sec'+Date.now()+Math.random()),sa=getAuth(sec),cr=await createUserWithEmailAndPassword(sa,u+'@'+DOMAIN,pw);await signOut(sa);
- await setDoc(doc(db,'teachers',cr.user.uid),{name:String(t.name).trim(),klass:String(t.klass||'').trim(),subject:String(t.subject||'').trim(),username:u,role:'Teacher'})}
-async function addTeacher(){
- if(!$('tName').value||!$('tUser').value.trim()||$('tPass').value.length<6)return msg('teacherMsg','নাম, ইউজারনেম ও ৬+ অক্ষরের পাসওয়ার্ড দিন।','err');
- try{await createTeacher({name:$('tName').value,klass:$('tClass').value,subject:$('tSubj').value,username:$('tUser').value,password:$('tPass').value});msg('teacherMsg','শিক্ষক তৈরি হয়েছে।','ok')}
- catch(e){msg('teacherMsg',e.code==='auth/email-already-in-use'?'এই ইউজারনেম আগে থেকেই আছে।':e.message,'err')}}
+ const u=String(t.username).trim().toLowerCase().replace('@'+DOMAIN,''),pw=String(t.password),email=u+'@'+DOMAIN;
+ const sec=initializeApp(firebaseConfig,'sec'+Date.now()+Math.random()),sa=getAuth(sec);let uid;
+ try{uid=(await createUserWithEmailAndPassword(sa,email,pw)).user.uid}
+ catch(e){if(e.code!=='auth/email-already-in-use')throw e;
+  // অ্যাকাউন্ট আছে কিন্তু প্রোফাইল মুছে গেছে/তৈরি হয়নি — একই পাসওয়ার্ড হলে প্রোফাইল পুনরুদ্ধার
+  try{uid=(await signInWithEmailAndPassword(sa,email,pw)).user.uid}catch(_){throw dupErr()}
+  if((await getDoc(doc(db,'teachers',uid))).exists()){await signOut(sa);throw dupErr()}}
+ await signOut(sa);
+ await setDoc(doc(db,'teachers',uid),{name:String(t.name).trim(),klass:String(t.klass||'').trim(),subject:String(t.subject||'').trim(),username:u,role:'Teacher'})}
+let EDIT_UID=null,TLIST=[];
+function openTeacherForm(uid){EDIT_UID=uid||null;const t=uid?TLIST.find(x=>x.uid===uid):null;
+ $('tFormTitle').textContent=t?'শিক্ষকের তথ্য সম্পাদনা':'নতুন শিক্ষক';
+ $('tName').value=t?t.name:'';$('tClass').value=t?t.klass:'';$('tSubj').value=t?t.subject:'';$('tUser').value=t?t.username:'';$('tPass').value='';
+ $('tUser').disabled=$('tPass').disabled=!!t;
+ $('tFormNote').textContent=t?'ইউজারনেম ও পাসওয়ার্ড এখান থেকে বদলানো যায় না (পাসওয়ার্ড বদলাতে Firebase Console > Authentication ব্যবহার করুন)।':'';
+ $('teacherForm').classList.remove('hidden');$('tName').focus()}
+function closeTeacherForm(){EDIT_UID=null;$('teacherForm').classList.add('hidden')}
+async function saveTeacherForm(){
+ if(!$('tName').value.trim())return msg('teacherMsg','নাম দিন।','err');
+ try{
+  if(EDIT_UID){await setDoc(doc(db,'teachers',EDIT_UID),{name:$('tName').value.trim(),klass:$('tClass').value.trim(),subject:$('tSubj').value.trim()},{merge:true});msg('teacherMsg','তথ্য আপডেট হয়েছে।','ok')}
+  else{if(!$('tUser').value.trim()||$('tPass').value.length<6)return msg('teacherMsg','ইউজারনেম ও ৬+ অক্ষরের পাসওয়ার্ড দিন।','err');
+   await createTeacher({name:$('tName').value,klass:$('tClass').value,subject:$('tSubj').value,username:$('tUser').value,password:$('tPass').value});msg('teacherMsg','শিক্ষক তৈরি হয়েছে।','ok')}
+  closeTeacherForm();loadTeachers()
+ }catch(e){msg('teacherMsg',e.code==='auth/email-already-in-use'?'এই ইউজারনেম আগে থেকেই আছে।':e.code==='auth/invalid-email'?'ইউজারনেমে ইংরেজি অক্ষর/সংখ্যা ব্যবহার করুন।':e.message,'err')}}
+async function loadTeachers(){
+ try{const sn=await getDocs(collection(db,'teachers'));TLIST=[];sn.forEach(d=>TLIST.push({uid:d.id,...d.data()}));
+  TLIST=TLIST.filter(t=>t.role!=='Admin').sort((a,b)=>String(a.klass).localeCompare(String(b.klass),undefined,{numeric:true})||String(a.name).localeCompare(String(b.name)));
+  $('teacherList').innerHTML=TLIST.length?`<p class="muted">মোট ${TLIST.length} জন শিক্ষক</p><div class="scroll"><table><thead><tr><th>#</th><th class="name">নাম</th><th>শ্রেণি</th><th class="name">বিষয়</th><th>ইউজারনেম</th><th>অ্যাকশন</th></tr></thead><tbody>`+
+   TLIST.map((t,i)=>`<tr><td>${i+1}</td><td class="name">${esc(t.name)}</td><td>${esc(t.klass)||'সব'}</td><td class="name">${esc(t.subject)}</td><td>${esc(t.username)}</td><td><button class="btn ghost sm" onclick="openTeacherForm('${t.uid}')">✏️ এডিট</button> <button class="btn ghost sm" style="color:#dc2626;border-color:#dc2626" onclick="deleteTeacher('${t.uid}')">🗑️ ডিলিট</button></td></tr>`).join('')+'</tbody></table></div>':'<p class="muted">কোনো শিক্ষক নেই। উপরের ＋ বাটনে বা এক্সেল থেকে যোগ করুন।</p>'
+ }catch(e){msg('teacherMsg',e.message,'err')}}
+async function deleteTeacher(uid){const t=TLIST.find(x=>x.uid===uid);if(!t||!confirm(`"${t.name}" (${t.username}) কে মুছে ফেলবেন? তিনি আর লগইন করতে পারবেন না।`))return;
+ try{await deleteDoc(doc(db,'teachers',uid));msg('teacherMsg','মুছে ফেলা হয়েছে।','ok');loadTeachers()}catch(e){msg('teacherMsg',e.message,'err')}}
 async function uploadTeachers(){const f=$('tFile').files[0];if(!f)return msg('teacherMsg','আগে এক্সেল ফাইল বেছে নিন।','err');
  try{const wb=XLSX.read(await f.arrayBuffer()),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});
   const pick=(r,ks)=>{for(const key in r)if(ks.includes(key.trim().toLowerCase()))return String(r[key]).trim();return''};
@@ -342,10 +371,10 @@ async function uploadTeachers(){const f=$('tFile').files[0];if(!f)return msg('te
    if(!t.name||!t.username||t.password.length<6){errs.push('সারি '+(i+2)+': তথ্য অসম্পূর্ণ/পাসওয়ার্ড ৬ অক্ষরের কম');continue}
    msg('teacherMsg','তৈরি হচ্ছে... '+(i+1)+'/'+rows.length,'ok');
    try{await createTeacher(t);ok++}catch(e){errs.push('সারি '+(i+2)+' ('+t.username+'): '+(e.code==='auth/email-already-in-use'?'ইউজারনেম আগে থেকেই আছে':e.code==='auth/invalid-email'?'ইউজারনেমে ইংরেজি অক্ষর/সংখ্যা ব্যবহার করুন':e.message))}}
-  msg('teacherMsg',ok+' জন শিক্ষক তৈরি হয়েছে।'+(errs.length?' সমস্যা: '+errs.join(' | '):''),errs.length?'err':'ok');$('tFile').value=''
+  msg('teacherMsg',ok+' জন শিক্ষক তৈরি হয়েছে।'+(errs.length?' সমস্যা: '+errs.join(' | '):''),errs.length?'err':'ok');$('tFile').value='';loadTeachers()
  }catch(e){msg('teacherMsg','আপলোড ব্যর্থ: '+e.message,'err')}}
 function downloadTeacherTemplate(){const ws=XLSX.utils.aoa_to_sheet([['Name','Class','Subject','Username','Password'],['মো: মায়েন উদ্দিন','9,10','গণিত','mayen','mayen123'],['শাহ আলম','6','গণিত','shahalam','shah123']]);
  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Teachers');XLSX.writeFile(wb,'teachers_template.xlsx')}
 
-Object.assign(window,{doLogin,logout,showScreen,loadGrid,saveGrid,loadResult,lookupPublic,loadBulk,loadMerit,onMeClass,openSheet,loadStudents,addStudent,uploadStudents,downloadTemplate,loadFull,saveFull,addTeacher,uploadTeachers,downloadTeacherTemplate});
+Object.assign(window,{doLogin,logout,showScreen,loadGrid,saveGrid,loadResult,lookupPublic,loadBulk,loadMerit,onMeClass,openSheet,loadStudents,addStudent,uploadStudents,downloadTemplate,loadFull,saveFull,openTeacherForm,closeTeacherForm,saveTeacherForm,deleteTeacher,uploadTeachers,downloadTeacherTemplate});
 </script></body></html>
