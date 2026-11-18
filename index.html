@@ -141,8 +141,8 @@ const S68=[
  {name:'কৃষি শিক্ষা',L:three,F:[25,15,10],opt:1}];
 const sub=(name,L,F,P,T,x)=>({name,L,F,P,T,...x});
 const S910=[
- sub('বাংলা',['১ম সৃজনশীল','১ম নৈর্ব্যক্তিক','২য় সৃজনশীল','২য় নৈর্ব্যক্তিক'],[70,30,70,30],[null,null,null,null],66,{groups:[{name:'সৃজনশীল',ix:[0,2],pass:45},{name:'নৈর্ব্যক্তিক',ix:[1,3],pass:19}]}),
- sub('ইংরেজি',pp,[100,100],[null,null],66),
+ sub('বাংলা',['১ম সৃজনশীল','১ম নৈর্ব্যক্তিক','২য় সৃজনশীল','২য় নৈর্ব্যক্তিক'],[70,30,70,30],[null,null,null,null],66,{E:['বাংলা ১ম','বাংলা ১ম','বাংলা ২য়','বাংলা ২য়'],groups:[{name:'সৃজনশীল',ix:[0,2],pass:45},{name:'নৈর্ব্যক্তিক',ix:[1,3],pass:19}]}),
+ sub('ইংরেজি',pp,[100,100],[null,null],66,{E:['ইংরেজি ১ম','ইংরেজি ২য়']}),
  sub('গণিত',two,[70,30],[23,10],33),
  sub('পদার্থবিজ্ঞান',three,[50,25,25],[17,8,8],33),sub('রসায়ন',three,[50,25,25],[17,8,8],33),sub('জীববিজ্ঞান',three,[50,25,25],[17,8,8],33),
  sub('বাংলাদেশ ও বিশ্বপরিচয়',two,[70,30],[23,10],33),sub('ইসলাম ও নৈতিক শিক্ষা/হিন্ধু ধর্ম',two,[70,30],[23,10],33),
@@ -159,7 +159,7 @@ const grpRoll=r=>{const m=String(r||'').trim().toUpperCase().match(/^\d+\s*([ASB
 const grpBn={Science:'বিজ্ঞান',Arts:'মানবিক',Commerce:'ব্যবসায় শিক্ষা'};
 const _c={};
 function cols(k){k=+k;if(_c[k])return _c[k];const nine=k>=9,S=nine?S910:S68;let i=2;const out=[],subs=[];
- S.forEach(s=>{const idx=[];s.L.forEach((l,j)=>{out.push({idx:i,id:'c'+i,label:s.name+' '+l,subj:s.name,entry:nine?s.name:(s.E?s.E[j]:s.name),def:s.F[j]});idx.push(i++)});subs.push({...s,idx})});
+ S.forEach(s=>{const idx=[];s.L.forEach((l,j)=>{out.push({idx:i,id:'c'+i,label:s.name+' '+l,subj:s.name,entry:s.E?s.E[j]:s.name,def:s.F[j]});idx.push(i++)});subs.push({...s,idx})});
  return _c[k]={cols:out,subs}}
 
 /* ===== গ্রেড ইঞ্জিন ===== */
@@ -219,8 +219,8 @@ async function logout(){await signOut(auth);USER=null;$('lp').value='';showScree
 
 function startApp(){
  $('whoami').textContent=USER.name+(isAdmin()?' (প্রধান শিক্ষক)':' — '+USER.subject);
- const tabs=[['tabMarks','নম্বর এন্ট্রি'],['tabResult','ফলাফল'],['tabMerit','মেধা তালিকা']];
- if(isAdmin())tabs.push(['tabStudents','শিক্ষার্থী'],['tabBulk','সকল মার্কশিট প্রিন্ট'],['tabSetup','সেটআপ']);
+ const tabs=[['tabMarks','নম্বর এন্ট্রি']];
+ if(isAdmin())tabs.push(['tabResult','ফলাফল'],['tabMerit','মেধা তালিকা'],['tabStudents','শিক্ষার্থী'],['tabBulk','সকল মার্কশিট প্রিন্ট'],['tabSetup','সেটআপ']);
  const tc=$('tabs');tc.innerHTML='';
  tabs.forEach((t,i)=>{const d=document.createElement('div');d.className='tab'+(i?'':' active');d.textContent=t[1];d.onclick=()=>selectTab(t[0],d);tc.appendChild(d)});
  ['mClass','rClass','meClass','sClass','bpClass','fClass'].forEach(x=>fill(x,CLASSES));
@@ -238,7 +238,7 @@ async function loadGrid(){
  try{
   const [fulls,st,ms]=await Promise.all([loadFulls(k,e),getDocs(query(collection(db,'students'),where('klass','==',k))),marksQ(k,e)]);
   const mk={};ms.forEach(d=>mk[d.data().roll]=d.data().v||{});
-  let cs=cols(k).cols;if(sf!=='ALL')cs=cs.filter(c=>nz(k>=9?c.subj:c.entry)===nz(sf));
+  let cs=cols(k).cols;if(sf!=='ALL')cs=cs.filter(c=>nz(c.entry)===nz(sf)||(k>=9&&nz(c.subj)===nz(sf)));
   const al=(k>=9&&sf!=='ALL')?allowed(sf):[];
   let rows=[];st.forEach(d=>rows.push(d.data()));
   rows=rows.filter(r=>!(al.length&&!al.includes(grpRoll(r.roll)))).sort((a,b)=>String(a.roll).localeCompare(String(b.roll),undefined,{numeric:true}));
