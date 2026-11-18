@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>হেসাখাল বাজার হাই-স্কুল রেজাল্ট ম্যানেজমেন্ট</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#f4f6f9;--card:#fff;--ink:#1b2733;--muted:#64748b;--line:#e2e8f0;--brand:#0f766e;--brand-d:#0b5c55;--ok:#16a34a;--bad:#dc2626}
+*{box-sizing:border-box}body{margin:0;font-family:'Segoe UI','Hind Siliguri',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+header.top{background:var(--brand);color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+header.top h1{font-size:18px;margin:0}.wrap{max-width:1100px;margin:0 auto;padding:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:16px}
+label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+input,select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:15px;font-family:inherit;background:#fff}
+.btn{display:inline-flex;align-items:center;justify-content:center;background:var(--brand);color:#fff;border:0;padding:10px 18px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn:hover{background:var(--brand-d)}.btn.ghost{background:transparent;color:var(--brand);border:1px solid var(--brand)}.btn.sm{padding:6px 12px;font-size:13px}
+.row{display:flex;gap:12px;flex-wrap:wrap}.row>div{flex:1;min-width:150px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}.tab{padding:8px 16px;border-radius:20px;background:#fff;border:1px solid var(--line);cursor:pointer;font-size:14px;font-weight:600;color:var(--muted)}
+.tab.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{border:1px solid var(--line);padding:7px 9px;text-align:center}
+th{background:#f1f5f9;position:sticky;top:0}td.name,th.name{text-align:right}
+.scroll{overflow:auto;max-height:60vh;border:1px solid var(--line);border-radius:8px}
+input.mark{padding:5px;text-align:center;width:70px}
+input.mark.over{background:#fecaca!important;border:2px solid var(--bad)!important;color:#991b1b;font-weight:700}
+input.mark:disabled{background:#e5e7eb}
+.msg{padding:10px 14px;border-radius:8px;margin:10px 0;font-size:14px;display:none}.msg.show{display:block}
+.msg.ok{background:#dcfce7;color:#166534}.msg.err{background:#fee2e2;color:#991b1b}
+.hidden{display:none!important}.g-pass{color:var(--ok)}.g-fail{color:var(--bad)}.center{text-align:center}.muted{color:var(--muted);font-size:13px}
+.pill{display:inline-block;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:700}.pill.pass{background:#dcfce7;color:#166534}.pill.fail{background:#fee2e2;color:#991b1b}
+.loader{text-align:center;padding:30px;color:var(--muted)}.login-box{max-width:420px;margin:6vh auto}.login-box h2{text-align:center;color:var(--brand);margin-top:0}
+.link{color:var(--brand);cursor:pointer;text-decoration:underline;font-size:14px}
+.sheet{max-width:760px;margin:0 auto 28px;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;break-after:page}
+.sheet-head{background:linear-gradient(135deg,var(--brand),var(--brand-d));color:#fff;padding:20px 26px;display:flex;align-items:center;gap:16px}
+.sheet-head .logo{width:65px;height:65px;background:#fff;border-radius:50%;overflow:hidden;flex:0 0 65px}.logo img{width:100%;height:100%;object-fit:cover}
+.sheet-head h2{margin:0;font-size:19px}.sheet-head p{margin:2px 0 0;font-size:12.5px}.sheet-head .info{flex:1}
+.exam-tag{background:rgba(0,0,0,.25);padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600}
+.sheet-body{padding:20px 26px 26px}.sinfo{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px 18px;margin-bottom:16px;background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px}.summary .box{border:1px solid var(--line);border-radius:10px;padding:12px 8px;text-align:center;background:#f8fafc}
+.summary .box span{color:var(--muted);font-size:11.5px;display:block}.summary .box b{font-size:20px;color:var(--brand-d)}
+.sig-row{display:flex;justify-content:space-between;font-weight:600;font-size:12.5px;margin-top:34px;color:var(--muted)}.sig-row span{border-top:1px solid var(--line);width:30%;text-align:center;padding-top:6px}
+.sig-row img{width:50px;display:block;margin:0 auto 5px}.sheet-foot{text-align:center;font-size:11px;color:var(--muted);padding-top:12px}
+@media print{header.top,.tabs,.no-print,.btn,.main-footer{display:none!important}body{background:#fff}.wrap{padding:0;max-width:none}.card{border:0;padding:0}.sheet{border:1px solid #000;border-radius:0}.scroll{max-height:none!important;overflow:visible!important}}
+@page{size:A4;margin:12mm}.main-footer{background:#064e3b;color:#fff;text-align:center;padding:14px;font-size:13px;margin-top:30px}
+</style></head><body>
+
+<div id="screenLogin"><div class="wrap"><div class="card login-box">
+<h2>হেসাখাল বাজার হাই-স্কুল রেজাল্ট ম্যানেজমেন্ট</h2><p class="muted center">শিক্ষক / প্রধান শিক্ষক লগইন</p>
+<div id="loginMsg" class="msg"></div>
+<label>ইউজারনেম</label><input id="lu" autocomplete="username"><label>পাসওয়ার্ড</label><input id="lp" type="password" autocomplete="current-password">
+<div style="margin-top:16px"><button class="btn" style="width:100%" onclick="doLogin()">লগইন</button></div>
+<p class="center" style="margin-top:18px"><span class="link" onclick="showScreen('screenPublic')">শিক্ষার্থী? রোল দিয়ে রেজাল্ট দেখুন →</span></p>
+</div></div></div>
+
+<div id="screenPublic" class="hidden"><div class="wrap"><div class="card login-box">
+<h2>রেজাল্ট দেখুন</h2><div id="pubMsg" class="msg"></div>
+<div class="row"><div><label>শ্রেণি</label><select id="pubClass"></select></div><div><label>পরীক্ষা</label><select id="pubExam"></select></div></div>
+<label>রোল নম্বর</label><input id="pubRoll" placeholder="যেমন: 9S01">
+<div style="margin-top:16px"><button class="btn" style="width:100%" onclick="lookupPublic()">রেজাল্ট দেখুন</button></div>
+<p class="center" style="margin-top:16px"><span class="link" onclick="showScreen('screenLogin')">← শিক্ষক লগইন</span></p>
+</div><div id="pubResult"></div></div></div>
+
+<div id="screenApp" class="hidden">
+<header class="top"><h1>হেসাখাল বাজার হাই-স্কুল রেজাল্ট ম্যানেজমেন্ট</h1>
+<div><span id="whoami"></span> <button class="btn ghost sm" style="color:#fff;border-color:#fff" onclick="logout()">লগআউট</button></div></header>
+<div class="wrap"><div class="tabs" id="tabs"></div>
+
+<div id="tabMarks" class="tabpane card">
+<div class="row no-print"><div><label>শ্রেণি</label><select id="mClass"></select></div><div><label>পরীক্ষা</label><select id="mExam"></select></div>
+<div style="display:flex;align-items:flex-end"><button class="btn" onclick="loadGrid()">লোড করুন</button></div></div>
+<div id="marksMsg" class="msg"></div><div id="gridArea"></div></div>
+
+<div id="tabResult" class="tabpane card hidden">
+<div class="row no-print"><div><label>শ্রেণি</label><select id="rClass"></select></div><div><label>পরীক্ষা</label><select id="rExam"></select></div>
+<div><label>রোল</label><input id="rRoll"></div><div style="display:flex;align-items:flex-end"><button class="btn" onclick="loadResult()">দেখুন</button></div></div>
+<div id="resultMsg" class="msg"></div><div id="resultArea"></div></div>
+
+<div id="tabMerit" class="tabpane card hidden">
+<div class="row no-print"><div><label>শ্রেণি</label><select id="meClass" onchange="onMeClass()"></select></div><div><label>পরীক্ষা</label><select id="meExam"></select></div>
+<div id="meGroupWrap" class="hidden"><label>বিভাগ</label><select id="meGroup"><option value="Science">বিজ্ঞান</option><option value="Arts">মানবিক</option><option value="Commerce">ব্যবসায় শিক্ষা</option></select></div>
+<div style="display:flex;align-items:flex-end;gap:8px"><button class="btn" onclick="loadMerit()">তালিকা দেখুন</button><button class="btn ghost sm" onclick="window.print()">প্রিন্ট</button></div></div>
+<div id="meritMsg" class="msg"></div><div id="meritArea"></div></div>
+
+<div id="tabStudents" class="tabpane card hidden">
+<div class="row no-print"><div><label>শ্রেণি</label><select id="sClass"></select></div>
+<div style="display:flex;align-items:flex-end"><button class="btn" onclick="loadStudents()">তালিকা দেখুন</button></div></div>
+<div class="card" style="background:#f8fafc;margin-top:10px"><b>📥 এক্সেল থেকে শিক্ষার্থী আপলোড</b>
+<p class="muted">কলাম: Roll | Name | Class | Section (Class ফাঁকা থাকলে উপরে নির্বাচিত শ্রেণি ধরা হবে)। একই রোল থাকলে তথ্য আপডেট হবে।</p>
+<div class="row"><div><input type="file" id="stFile" accept=".xlsx,.xls,.csv"></div>
+<div style="display:flex;gap:8px"><button class="btn" onclick="uploadStudents()">আপলোড</button><button class="btn ghost" onclick="downloadTemplate()">টেমপ্লেট ডাউনলোড</button></div></div></div>
+<div class="card" style="background:#f8fafc"><b>নতুন শিক্ষার্থী (একজন)</b><div class="row">
+<div><label>রোল</label><input id="stRoll"></div><div><label>নাম</label><input id="stName"></div><div><label>সেকশন</label><input id="stSec"></div>
+<div style="display:flex;align-items:flex-end"><button class="btn" onclick="addStudent()">যোগ করুন</button></div></div></div>
+<div id="studentsMsg" class="msg"></div><div id="studentsArea"></div></div>
+
+<div id="tabBulk" class="tabpane card hidden">
+<div class="row no-print"><div><label>শ্রেণি</label><select id="bpClass"></select></div><div><label>পরীক্ষা</label><select id="bpExam"></select></div>
+<div style="display:flex;align-items:flex-end;gap:8px"><button class="btn" onclick="loadBulk()">লোড করুন</button><button class="btn" id="bpPrint" style="display:none" onclick="window.print()">🖨️ প্রিন্ট / PDF</button></div></div>
+<div id="bulkMsg" class="msg"></div><div id="bulkArea"></div></div>
+
+<div id="tabSetup" class="tabpane card hidden">
+<b>পূর্ণমান সেটআপ</b>
+<div class="row"><div><label>শ্রেণি</label><select id="fClass"></select></div><div><label>পরীক্ষা</label><select id="fExam"></select></div>
+<div style="display:flex;align-items:flex-end"><button class="btn" onclick="loadFull()">লোড</button></div></div>
+<div id="fullMsg" class="msg"></div><div id="fullArea"></div><hr style="margin:24px 0;border:0;border-top:1px solid var(--line)">
+<b>শিক্ষক যোগ করুন</b><div class="row">
+<div><label>নাম</label><input id="tName"></div><div><label>শ্রেণি (ফাঁকা = সব)</label><input id="tClass"></div>
+<div><label>বিষয় (হুবহু)</label><input id="tSubj"></div><div><label>ইউজারনেম</label><input id="tUser"></div>
+<div><label>পাসওয়ার্ড (≥৬)</label><input id="tPass"></div></div>
+<div style="margin-top:12px"><button class="btn" onclick="addTeacher()">শিক্ষক তৈরি</button></div><div id="teacherMsg" class="msg"></div></div>
+</div></div>
+
+<footer class="main-footer no-print">© 2026 হেসাখাল বাজার হাই-স্কুল। সর্বস্বত্ব সংরক্ষিত। | Powered by ManHaIT</footer>
+
+<script type="module">
+import {firebaseConfig} from './firebase-config.js';
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import {getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged,createUserWithEmailAndPassword} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import {getFirestore,doc,getDoc,setDoc,getDocs,collection,query,where,writeBatch} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
+const DOMAIN='hbhs.app';
+const SCHOOL={name:'হেসাখাল বাজার হাই-স্কুল',logo:'https://i.im.ge/QMCgKBW/school_logo.jpg',
+ teacherSign:'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEigW3kA949hp-Sr-M4IcMyvu7oKB5ltsgllZRLbNLnSriHELfOSIgHoi0VKpUNMsLGTmiGRZhmJtHmqvfohYMKjVNLYiqXkqnAyM1tNGM5ITzq-9fFiSS73wfXPW4y9lBYDZRgHSpQaT7sznM_rujerPn1b5HTXfoHsEgGMuN0iIa77pAj35icVR4lyL-OE/s320/21mu%20sign.jpg',
+ hmSign:'https://i.im.ge/QMRgO5W/hm_signe.jpg'};
+const CLASSES=[6,7,8,9,10],EXAMS=[{key:'HalfYearly',label:'অর্ধ-বার্ষিক পরীক্ষা'},{key:'Annual',label:'বার্ষিক/নির্বাচনী পরীক্ষা'}];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+let USER=null;
+
+/* ===== বিষয়/কলাম কনফিগ (পূর্ণমান ডিফল্ট; অ্যাডমিন 'সেটআপ' ট্যাবে বদলাতে পারবে) ===== */
+const two=['সৃজনশীল','নৈর্ব্যক্তিক'],three=[...two,'ব্যবহারিক'],pp=['১ম পত্র','২য় পত্র'];
+const S68=[
+ {name:'বাংলা',L:['১ম সৃজনশীল','১ম নৈর্ব্যক্তিক','২য় সৃজনশীল','২য় নৈর্ব্যক্তিক'],F:[70,30,70,30],E:['বাংলা ১ম','বাংলা ১ম','বাংলা ২য়','বাংলা ২য়']},
+ {name:'ইংরেজি',L:pp,F:[100,100],E:['ইংরেজি ১ম','ইংরেজি ২য়']},
+ {name:'গণিত',L:two,F:[70,30]},{name:'বিজ্ঞান',L:two,F:[70,30]},{name:'বাংলাদেশ ও বিশ্বপরিচয়',L:two,F:[70,30]},
+ {name:'তথ্য ও যোগাযোগ প্রযুক্তি',L:two,F:[25,25]},{name:'ইসলাম ও নৈতিক শিক্ষা/হিন্ধু ধর্ম',L:two,F:[70,30]},
+ {name:'কৃষি শিক্ষা',L:three,F:[25,15,10],opt:1}];
+const sub=(name,L,F,P,T,x)=>({name,L,F,P,T,...x});
+const S910=[
+ sub('বাংলা',['১ম সৃজনশীল','১ম নৈর্ব্যক্তিক','২য় সৃজনশীল','২য় নৈর্ব্যক্তিক'],[70,30,70,30],[null,null,null,null],66,{groups:[{name:'সৃজনশীল',ix:[0,2],pass:45},{name:'নৈর্ব্যক্তিক',ix:[1,3],pass:19}]}),
+ sub('ইংরেজি',pp,[100,100],[null,null],66),
+ sub('গণিত',two,[70,30],[23,10],33),
+ sub('পদার্থবিজ্ঞান',three,[50,25,25],[17,8,8],33),sub('রসায়ন',three,[50,25,25],[17,8,8],33),sub('জীববিজ্ঞান',three,[50,25,25],[17,8,8],33),
+ sub('বাংলাদেশ ও বিশ্বপরিচয়',two,[70,30],[23,10],33),sub('ইসলাম ও নৈতিক শিক্ষা/হিন্ধু ধর্ম',two,[70,30],[23,10],33),
+ sub('তথ্য ও যোগাযোগ প্রযুক্তি',['তত্ত্বীয়','ব্যবহারিক'],[25,25],[8,8],16),
+ sub('উচ্চতর গণিত',three,[50,25,25],[17,8,8],33,{oc:1}),
+ sub('ভূগোল',two,[70,30],[23,10],33),sub('ইতিহাস ও সভ্যতা',two,[70,30],[23,10],33),sub('পৌরনীতি ও নাগরিকত্ব',two,[70,30],[23,10],33),
+ sub('বিজ্ঞান',two,[70,30],[23,10],33),sub('হিসাববিজ্ঞান',two,[70,30],[23,10],33),sub('ফিন্যান্স ও ব্যাংকিং',two,[70,30],[23,10],33),sub('ব্যবসায় উদ্যোগ',two,[70,30],[23,10],33),
+ sub('কৃষি শিক্ষা',three,[50,25,25],[17,8,8],33,{oc:1})];
+const SG={'পদার্থবিজ্ঞান':['Science'],'রসায়ন':['Science'],'জীববিজ্ঞান':['Science'],'উচ্চতর গণিত':['Science'],'বাংলাদেশ ও বিশ্বপরিচয়':['Science'],
+ 'হিসাববিজ্ঞান':['Commerce'],'ফিন্যান্স ও ব্যাংকিং':['Commerce'],'ব্যবসায় উদ্যোগ':['Commerce'],'ভূগোল':['Arts'],'ইতিহাস ও সভ্যতা':['Arts'],'পৌরনীতি ও নাগরিকত্ব':['Arts'],'বিজ্ঞান':['Arts','Commerce']};
+const nz=s=>String(s||'').normalize('NFC').replace(/\s+/g,'');
+const allowed=s=>{const k=Object.keys(SG).find(x=>nz(x)===nz(s));return k?SG[k]:[]};   // EXACT match (সাবস্ট্রিং নয়)
+const grpRoll=r=>{const m=String(r||'').trim().toUpperCase().match(/^\d+\s*([ASB])/);return m?{A:'Arts',S:'Science',B:'Commerce'}[m[1]]:''};
+const grpBn={Science:'বিজ্ঞান',Arts:'মানবিক',Commerce:'ব্যবসায় শিক্ষা'};
+const _c={};
+function cols(k){k=+k;if(_c[k])return _c[k];const nine=k>=9,S=nine?S910:S68;let i=2;const out=[],subs=[];
+ S.forEach(s=>{const idx=[];s.L.forEach((l,j)=>{out.push({idx:i,id:'c'+i,label:s.name+' '+l,subj:s.name,entry:nine?s.name:(s.E?s.E[j]:s.name),def:s.F[j]});idx.push(i++)});subs.push({...s,idx})});
+ return _c[k]={cols:out,subs}}
+
+/* ===== গ্রেড ইঞ্জিন ===== */
+const GT=[[80,5,'A+'],[70,4,'A'],[60,3.5,'A-'],[50,3,'B'],[40,2,'C'],[33,1,'D'],[0,0,'F']];
+const grade=p=>{const g=GT.find(x=>p>=x[0]);return{gp:g[1],letter:g[2]}};
+const letterGpa=g=>g>=5?'A+':g>=4?'A':g>=3.5?'A-':g>=3?'B':g>=2?'C':g>=1?'D':'F';
+const r2=n=>Math.round(n*100)/100;
+function compute(k,v,fulls,roll){
+ k=+k;const nine=k>=9,g=nine?grpRoll(roll):'',res=[];
+ cols(k).subs.forEach(s=>{
+  if(nine){const a=allowed(s.name);if(a.length&&g&&!a.includes(g))return}
+  let taken=false,obt=0,full=0;
+  const cp=s.idx.map(i=>{const raw=v['c'+i],has=raw!==undefined&&raw!==''&&raw!==null,o=has?(+raw||0):0;if(has)taken=true;obt+=o;full+=(+fulls['c'+i]||0);return o});
+  if(!taken)return;
+  const fr=[];
+  if(nine){cp.forEach((o,j)=>{const p=s.P[j];if(p!=null&&o<p)fr.push('অংশ '+(j+1)+'-এ ন্যূনতম '+p+' প্রয়োজন')});
+   (s.groups||[]).forEach(gr=>{if(gr.ix.reduce((a,j)=>a+cp[j],0)<gr.pass)fr.push(gr.name+'-এ ন্যূনতম '+gr.pass+' প্রয়োজন')});
+   if(obt<s.T)fr.push('মোট ন্যূনতম '+s.T+' প্রয়োজন')}
+  const pct=full>0?obt/full*100:0,failed=nine?fr.length>0:pct<33,gr=failed?{gp:0,letter:'F'}:grade(pct);
+  res.push({subject:s.name,obtained:r2(obt),full,percent:r2(pct),letter:gr.letter,gp:gr.gp,failed,failReasons:fr,optional:!nine&&!!s.opt,oc:!!s.oc});
+ });
+ if(nine){const c=res.filter(x=>x.oc).sort((a,b)=>b.gp-a.gp||b.percent-a.percent||b.obtained-a.obtained);if(c.length)c[0].optional=true}
+ const opt=res.find(x=>x.optional),man=res.filter(x=>!x.optional),anyFail=man.some(x=>x.failed);
+ let gpa=0,letter='F';
+ if(man.length&&!anyFail){gpa=Math.min(5,(man.reduce((a,x)=>a+x.gp,0)+(opt?Math.max(opt.gp-2,0):0))/man.length);letter=letterGpa(gpa)}
+ return{subjects:res,totalObtained:r2(res.reduce((a,x)=>a+x.obtained,0)),totalFull:res.reduce((a,x)=>a+x.full,0),gpa:r2(gpa),letter,passed:letter!=='F'}}
+
+/* ===== ডেটা ===== */
+async function loadFulls(k,e){const d=(await getDoc(doc(db,'fullmarks',k+'_'+e))).data()||{},f={};cols(k).cols.forEach(c=>f[c.id]=d[c.id]!==undefined?+d[c.id]:c.def);return f}
+const marksQ=(k,e)=>getDocs(query(collection(db,'marks'),where('klass','==',+k),where('exam','==',e)));
+function build(k,e,x,fulls,max){const r=compute(k,x.v||{},fulls,x.roll);r.subjects.forEach(s=>s.classMax=max[s.subject]??s.obtained);
+ return{...r,roll:x.roll,name:x.name,klass:k,group:+k>=9?(grpBn[grpRoll(x.roll)]||''):'',examLabel:EXAMS.find(z=>z.key===e).label}}
+async function getResult(k,e,roll){roll=String(roll).trim().toUpperCase();const s=await getDoc(doc(db,'marks',k+'_'+e+'_'+roll));
+ if(!s.exists())throw new Error('রোল "'+roll+'" খুঁজে পাওয়া যায়নি।');
+ const [f,st]=await Promise.all([loadFulls(k,e),getDoc(doc(db,'stats',k+'_'+e))]);return build(k,e,s.data(),f,(st.data()||{}).max||{})}
+async function updateStats(k,e){const f=await loadFulls(k,e),snap=await marksQ(k,e),max={};
+ snap.forEach(d=>{const x=d.data();compute(k,x.v||{},f,x.roll).subjects.forEach(s=>{if(max[s.subject]===undefined||s.obtained>max[s.subject])max[s.subject]=s.obtained})});
+ await setDoc(doc(db,'stats',k+'_'+e),{max})}
+async function commit(ops){for(let i=0;i<ops.length;i+=400){const b=writeBatch(db);ops.slice(i,i+400).forEach(o=>b.set(o[0],o[1],{merge:true}));await b.commit()}}
+
+/* ===== UI ===== */
+function msg(el,t,type){const m=$(el);if(!m)return;m.textContent=t;m.className=t?'msg show '+(type||'ok'):'msg'}
+function fill(el,items,vk,lk){const s=$(el);if(!s)return;s.innerHTML=items.map(it=>vk?`<option value="${it[vk]}">${it[lk]}</option>`:`<option>${it}</option>`).join('')}
+function showScreen(id){['screenLogin','screenPublic','screenApp'].forEach(x=>$(x).classList.add('hidden'));$(id).classList.remove('hidden')}
+const isAdmin=()=>USER&&USER.role==='Admin';
+fill('pubClass',CLASSES);fill('pubExam',EXAMS,'key','label');
+
+onAuthStateChanged(auth,async u=>{
+ if(!u){USER=null;return}
+ const d=await getDoc(doc(db,'teachers',u.uid));
+ if(!d.exists()){await signOut(auth);msg('loginMsg','এই একাউন্টের শিক্ষক-প্রোফাইল নেই।','err');return}
+ USER={...d.data(),uid:u.uid};startApp()});
+async function doLogin(){const u=$('lu').value.trim().toLowerCase(),p=$('lp').value;
+ if(!u||!p)return msg('loginMsg','ইউজারনেম ও পাসওয়ার্ড দিন।','err');msg('loginMsg','যাচাই করা হচ্ছে...','ok');
+ try{await signInWithEmailAndPassword(auth,u+'@'+DOMAIN,p)}catch(e){msg('loginMsg','ভুল ইউজারনেম বা পাসওয়ার্ড।','err')}}
+async function logout(){await signOut(auth);USER=null;$('lp').value='';showScreen('screenLogin')}
+
+function startApp(){
+ $('whoami').textContent=USER.name+(isAdmin()?' (প্রধান শিক্ষক)':' — '+USER.subject);
+ const tabs=[['tabMarks','নম্বর এন্ট্রি'],['tabResult','ফলাফল'],['tabMerit','মেধা তালিকা']];
+ if(isAdmin())tabs.push(['tabStudents','শিক্ষার্থী'],['tabBulk','সকল মার্কশিট প্রিন্ট'],['tabSetup','সেটআপ']);
+ const tc=$('tabs');tc.innerHTML='';
+ tabs.forEach((t,i)=>{const d=document.createElement('div');d.className='tab'+(i?'':' active');d.textContent=t[1];d.onclick=()=>selectTab(t[0],d);tc.appendChild(d)});
+ ['mClass','rClass','meClass','sClass','bpClass','fClass'].forEach(x=>fill(x,CLASSES));
+ ['mExam','rExam','meExam','bpExam','fExam'].forEach(x=>fill(x,EXAMS,'key','label'));
+ if(!isAdmin()&&USER.klass)['mClass','rClass','meClass'].forEach(x=>$(x).value=USER.klass);
+ onMeClass();selectTab('tabMarks',tc.children[0]);showScreen('screenApp')}
+function selectTab(id,el){document.querySelectorAll('.tabpane').forEach(t=>t.classList.add('hidden'));$(id).classList.remove('hidden');
+ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));if(el)el.classList.add('active')}
+
+/* ===== নম্বর এন্ট্রি (পূর্ণমানের বেশি হলে লাল + অ্যালার্ট) ===== */
+let GRID=null;
+async function loadGrid(){
+ const k=+$('mClass').value,e=$('mExam').value,sf=isAdmin()?'ALL':(USER.subject||'ALL');
+ $('gridArea').innerHTML='<div class="loader">লোড হচ্ছে...</div>';msg('marksMsg','');
+ try{
+  const [fulls,st,ms]=await Promise.all([loadFulls(k,e),getDocs(query(collection(db,'students'),where('klass','==',k))),marksQ(k,e)]);
+  const mk={};ms.forEach(d=>mk[d.data().roll]=d.data().v||{});
+  let cs=cols(k).cols;if(sf!=='ALL')cs=cs.filter(c=>nz(k>=9?c.subj:c.entry)===nz(sf));
+  const al=(k>=9&&sf!=='ALL')?allowed(sf):[];
+  let rows=[];st.forEach(d=>rows.push(d.data()));
+  rows=rows.filter(r=>!(al.length&&!al.includes(grpRoll(r.roll)))).sort((a,b)=>String(a.roll).localeCompare(String(b.roll),undefined,{numeric:true}));
+  GRID={k,e,cs,rows,mk,fulls};
+  if(!cs.length)return $('gridArea').innerHTML='<p class="muted">এই বিষয়ের কোনো কলাম পাওয়া যায়নি।</p>';
+  if(!rows.length)return $('gridArea').innerHTML='<p class="muted">কোনো শিক্ষার্থী নেই। আগে শিক্ষার্থী আপলোড করুন।</p>';
+  let h='<div class="scroll"><table><thead><tr><th>রোল</th><th class="name">নাম</th>'+cs.map(c=>`<th>${esc(c.label)}<br><span class="muted">(${fulls[c.id]})</span></th>`).join('')+'</tr></thead><tbody>';
+  rows.forEach((r,ri)=>{const g=grpRoll(r.roll);h+=`<tr><td>${esc(r.roll)}</td><td class="name">${esc(r.name)}</td>`;
+   cs.forEach(c=>{const a=k>=9?allowed(c.subj):[],off=a.length&&!a.includes(g),v=(mk[r.roll]||{})[c.id];
+    h+=`<td><input class="mark" type="number" step="any" min="0" ${off?'disabled':''} data-r="${ri}" data-c="${c.id}" data-f="${fulls[c.id]}" value="${v===undefined||v===''||v===null?'':v}"></td>`});h+='</tr>'});
+  h+='</tbody></table></div><div style="margin-top:14px" class="no-print"><button class="btn" onclick="saveGrid()">সংরক্ষণ করুন</button></div>';
+  $('gridArea').innerHTML=h;
+ }catch(err){$('gridArea').innerHTML='';msg('marksMsg',err.message,'err')}}
+const over=t=>t.value!==''&&(+t.value>+t.dataset.f||+t.value<0);
+$('gridArea').addEventListener('input',ev=>{const t=ev.target;if(t.classList.contains('mark'))t.classList.toggle('over',over(t))});
+$('gridArea').addEventListener('change',ev=>{const t=ev.target;if(!t.classList.contains('mark'))return;t.classList.toggle('over',over(t));
+ if(over(t)){const r=GRID.rows[t.dataset.r].roll,c=GRID.cs.find(c=>c.id===t.dataset.c).label;
+  alert(`⚠️ ভুল নম্বর!\nরোল: ${r}\n${c}\nপূর্ণমান: ${t.dataset.f}, আপনি দিয়েছেন: ${t.value}\nঅনুগ্রহ করে সংশোধন করুন।`);t.focus()}});
+async function saveGrid(){
+ if(!GRID)return;const bad=document.querySelectorAll('#gridArea input.mark.over');
+ if(bad.length){bad[0].focus();return alert(`⚠️ ${bad.length} টি ঘরে নম্বর পূর্ণমানের বেশি (লাল ঘর)। সংশোধন না করা পর্যন্ত সংরক্ষণ হবে না।`)}
+ const by={};document.querySelectorAll('#gridArea input.mark:not(:disabled)').forEach(i=>{(by[i.dataset.r]=by[i.dataset.r]||{})[i.dataset.c]=i.value===''?'':Number(i.value)});
+ const {k,e}=GRID,ops=Object.keys(by).map(ri=>{const r=GRID.rows[ri];return[doc(db,'marks',k+'_'+e+'_'+String(r.roll).toUpperCase()),{klass:k,exam:e,roll:String(r.roll).toUpperCase(),name:r.name,v:by[ri]}]});
+ msg('marksMsg','সংরক্ষণ করা হচ্ছে...','ok');
+ try{await commit(ops);await updateStats(k,e);msg('marksMsg',ops.length+' জন শিক্ষার্থীর নম্বর সংরক্ষণ হয়েছে।','ok')}catch(err){msg('marksMsg',err.message,'err')}}
+
+/* ===== মার্কশিট ===== */
+function sheet(res){
+ let h=`<div class="sheet"><div class="sheet-head"><div class="logo"><img src="${SCHOOL.logo}" alt=""></div><div class="info"><h2>${esc(SCHOOL.name)}</h2><p>একাডেমিক ফলাফল বিবরণী</p></div><div class="exam-tag">${esc(res.examLabel)}</div></div><div class="sheet-body">`;
+ h+=`<div class="sinfo"><span><b>নাম:</b> ${esc(res.name)}</span><span><b>রোল:</b> ${esc(res.roll)}</span><span><b>শ্রেণি:</b> ${esc(res.klass)}</span>${res.group?`<span><b>বিভাগ:</b> ${esc(res.group)}</span>`:''}</div>`;
+ h+='<table><thead><tr><th class="name">বিষয়</th><th>প্রাপ্ত</th><th>পূর্ণমান</th><th>শতকরা</th><th>সর্বোচ্চ নম্বর</th><th>গ্রেড</th><th>পয়েন্ট</th></tr></thead><tbody>';
+ res.subjects.forEach(s=>{const rs=(s.failed&&!s.optional&&s.failReasons.length)?`<br><small class="g-fail">${esc(s.failReasons.join('; '))}</small>`:'';
+  h+=`<tr><td class="name">${esc(s.subject)}${s.optional?' <span class="muted">(৪র্থ বিষয়)</span>':''}${rs}</td><td>${s.obtained}</td><td>${s.full}</td><td>${s.percent}%</td><td class="muted">${s.classMax}</td><td class="${s.failed?'g-fail':'g-pass'}"><b>${s.letter}</b></td><td>${s.gp.toFixed(2)}</td></tr>`});
+ h+=`</tbody></table><div class="summary"><div class="box"><span>মোট নম্বর</span><b>${res.totalObtained}</b></div><div class="box"><span>GPA</span><b>${res.gpa.toFixed(2)}</b></div><div class="box"><span>গ্রেড</span><b>${res.letter}</b></div><div class="box"><span>ফলাফল</span><b><span class="pill ${res.passed?'pass':'fail'}">${res.passed?'উত্তীর্ণ':'অনুত্তীর্ণ'}</span></b></div></div>`;
+ h+=`<div class="sig-row"><span><b style="display:block;margin-bottom:5px">${new Date().toLocaleDateString('bn-BD')}</b>তারিখ</span><span><img src="${SCHOOL.teacherSign}" alt="">শ্রেণি শিক্ষকের স্বাক্ষর</span><span><img src="${SCHOOL.hmSign}" alt="">প্রধান শিক্ষকের স্বাক্ষর</span></div>`;
+ h+=`<div class="sheet-foot">© 2026 ${esc(SCHOOL.name)} | Powered by ManHaIT</div></div><div class="center no-print" style="margin:14px 0"><button class="btn" onclick="window.print()">প্রিন্ট / PDF</button></div></div>`;return h}
+async function loadResult(){const roll=$('rRoll').value.trim();if(!roll)return msg('resultMsg','রোল দিন।','err');
+ $('resultArea').innerHTML='<div class="loader">লোড হচ্ছে...</div>';msg('resultMsg','');
+ try{$('resultArea').innerHTML=sheet(await getResult($('rClass').value,$('rExam').value,roll))}catch(e){$('resultArea').innerHTML='';msg('resultMsg',e.message,'err')}}
+async function lookupPublic(){const roll=$('pubRoll').value.trim();if(!roll)return msg('pubMsg','রোল দিন।','err');
+ $('pubResult').innerHTML='<div class="loader">লোড হচ্ছে...</div>';msg('pubMsg','');
+ try{$('pubResult').innerHTML=sheet(await getResult($('pubClass').value,$('pubExam').value,roll))}catch(e){$('pubResult').innerHTML='';msg('pubMsg',e.message,'err')}}
+async function loadBulk(){const k=$('bpClass').value,e=$('bpExam').value;$('bulkArea').innerHTML='<div class="loader">তৈরি হচ্ছে...</div>';$('bpPrint').style.display='none';
+ try{const [f,st,ms]=await Promise.all([loadFulls(k,e),getDoc(doc(db,'stats',k+'_'+e)),marksQ(k,e)]),max=(st.data()||{}).max||{},l=[];
+  ms.forEach(d=>l.push(build(k,e,d.data(),f,max)));l.sort((a,b)=>a.roll.localeCompare(b.roll,undefined,{numeric:true}));
+  if(!l.length)return $('bulkArea').innerHTML='<p class="muted">কোনো ডেটা নেই।</p>';
+  $('bulkArea').innerHTML=l.map(sheet).join('');$('bpPrint').style.display='inline-flex';msg('bulkMsg',l.length+' জনের মার্কশিট লোড হয়েছে।','ok')
+ }catch(err){$('bulkArea').innerHTML='';msg('bulkMsg',err.message,'err')}}
+
+/* ===== মেধা তালিকা ===== */
+function onMeClass(){$('meGroupWrap').classList.toggle('hidden',+$('meClass').value<9)}
+async function loadMerit(){const k=+$('meClass').value,e=$('meExam').value,want=k>=9?$('meGroup').value:null;
+ $('meritArea').innerHTML='<div class="loader">লোড হচ্ছে...</div>';msg('meritMsg','');
+ try{const [f,ms]=await Promise.all([loadFulls(k,e),marksQ(k,e)]),l=[];
+  ms.forEach(d=>{const x=d.data();if(want&&grpRoll(x.roll)!==want)return;const r=compute(k,x.v||{},f,x.roll);l.push({roll:x.roll,name:x.name,t:r.totalObtained,gpa:r.gpa,letter:r.letter,passed:r.passed})});
+  l.sort((a,b)=>(a.passed!==b.passed?(a.passed?-1:1):0)||b.gpa-a.gpa||b.t-a.t);l.forEach((x,i)=>x.rank=x.passed?i+1:'-');
+  if(!l.length)return $('meritArea').innerHTML='<p class="muted">কোনো ডেটা নেই।</p>';
+  $('meritArea').innerHTML='<div class="scroll"><table><thead><tr><th>র‍্যাঙ্ক</th><th>রোল</th><th class="name">নাম</th><th>মোট</th><th>GPA</th><th>গ্রেড</th><th>ফলাফল</th><th class="no-print">মার্কশিট</th></tr></thead><tbody>'+
+   l.map(x=>`<tr><td><b>${x.rank}</b></td><td>${esc(x.roll)}</td><td class="name">${esc(x.name)}</td><td>${x.t}</td><td>${x.gpa.toFixed(2)}</td><td class="${x.passed?'g-pass':'g-fail'}"><b>${x.letter}</b></td><td><span class="pill ${x.passed?'pass':'fail'}">${x.passed?'উত্তীর্ণ':'অনুত্তীর্ণ'}</span></td><td class="no-print"><button class="btn ghost sm" onclick="openSheet('${k}','${e}','${esc(x.roll)}')">খুলুন</button></td></tr>`).join('')+'</tbody></table></div>';
+ }catch(err){$('meritArea').innerHTML='';msg('meritMsg',err.message,'err')}}
+function openSheet(k,e,roll){$('rClass').value=k;$('rExam').value=e;$('rRoll').value=roll;selectTab('tabResult',document.querySelectorAll('.tab')[1]);loadResult()}
+
+/* ===== শিক্ষার্থী + এক্সেল আপলোড ===== */
+const sid=(k,r)=>k+'_'+String(r).trim().toUpperCase();
+async function loadStudents(){const k=+$('sClass').value;$('studentsArea').innerHTML='<div class="loader">লোড হচ্ছে...</div>';
+ try{const s=await getDocs(query(collection(db,'students'),where('klass','==',k))),l=[];s.forEach(d=>l.push(d.data()));l.sort((a,b)=>String(a.roll).localeCompare(String(b.roll),undefined,{numeric:true}));
+  $('studentsArea').innerHTML=l.length?`<p class="muted">মোট ${l.length} জন</p><div class="scroll"><table><thead><tr><th>রোল</th><th class="name">নাম</th><th>শ্রেণি</th><th>সেকশন</th></tr></thead><tbody>`+l.map(x=>`<tr><td>${esc(x.roll)}</td><td class="name">${esc(x.name)}</td><td>${x.klass}</td><td>${esc(x.section)}</td></tr>`).join('')+'</tbody></table></div>':'<p class="muted">কোনো শিক্ষার্থী নেই।</p>'
+ }catch(e){$('studentsArea').innerHTML='';msg('studentsMsg',e.message,'err')}}
+async function addStudent(){const k=+$('sClass').value,roll=$('stRoll').value.trim().toUpperCase(),name=$('stName').value.trim();
+ if(!roll||!name)return msg('studentsMsg','রোল ও নাম দিন।','err');
+ await setDoc(doc(db,'students',sid(k,roll)),{roll,name,klass:k,section:$('stSec').value.trim()});$('stRoll').value=$('stName').value=$('stSec').value='';msg('studentsMsg','যোগ হয়েছে।','ok');loadStudents()}
+async function uploadStudents(){const f=$('stFile').files[0];if(!f)return msg('studentsMsg','আগে এক্সেল ফাইল বেছে নিন।','err');
+ try{const wb=XLSX.read(await f.arrayBuffer()),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''}),def=+$('sClass').value;
+  const pick=(r,ks)=>{for(const key in r)if(ks.includes(key.trim().toLowerCase()))return String(r[key]).trim();return''};
+  const ops=[],skipped=[];
+  rows.forEach((r,i)=>{const roll=pick(r,['roll','রোল']).toUpperCase(),name=pick(r,['name','নাম']);if(!roll||!name){skipped.push(i+2);return}
+   let k=parseInt(pick(r,['class','শ্রেণি','ক্লাস']));if(!CLASSES.includes(k))k=def;
+   ops.push([doc(db,'students',sid(k,roll)),{roll,name,klass:k,section:pick(r,['section','সেকশন'])}])});
+  if(!ops.length)return msg('studentsMsg','কোনো বৈধ সারি পাওয়া যায়নি (Roll ও Name কলাম লাগবে)।','err');
+  await commit(ops);msg('studentsMsg',ops.length+' জন আপলোড হয়েছে।'+(skipped.length?' বাদ পড়া সারি: '+skipped.join(', '):''),'ok');$('stFile').value='';loadStudents()
+ }catch(e){msg('studentsMsg','আপলোড ব্যর্থ: '+e.message,'err')}}
+function downloadTemplate(){const ws=XLSX.utils.aoa_to_sheet([['Roll','Name','Class','Section'],['9S01','নমুনা নাম',9,'Science'],['9A02','নমুনা নাম',9,'Arts'],['9B03','নমুনা নাম',9,'Commerce']]);
+ const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Students');XLSX.writeFile(wb,'students_template.xlsx')}
+
+/* ===== সেটআপ: পূর্ণমান ও শিক্ষক ===== */
+async function loadFull(){const k=+$('fClass').value,e=$('fExam').value,f=await loadFulls(k,e);
+ $('fullArea').innerHTML='<div class="scroll"><table><tbody>'+cols(k).cols.map(c=>`<tr><td class="name">${esc(c.label)}</td><td><input class="mark" type="number" min="0" data-c="${c.id}" value="${f[c.id]}"></td></tr>`).join('')+'</tbody></table></div><div style="margin-top:12px"><button class="btn" onclick="saveFull()">পূর্ণমান সংরক্ষণ</button></div>'}
+async function saveFull(){const k=$('fClass').value,e=$('fExam').value,o={};document.querySelectorAll('#fullArea input').forEach(i=>o[i.dataset.c]=Number(i.value)||0);
+ await setDoc(doc(db,'fullmarks',k+'_'+e),o);msg('fullMsg','পূর্ণমান সংরক্ষিত।','ok')}
+async function addTeacher(){const u=$('tUser').value.trim().toLowerCase(),p=$('tPass').value;
+ if(!$('tName').value||!u||p.length<6)return msg('teacherMsg','নাম, ইউজারনেম ও ৬+ অক্ষরের পাসওয়ার্ড দিন।','err');
+ try{const sec=initializeApp(firebaseConfig,'sec'+Date.now()),sa=getAuth(sec),cr=await createUserWithEmailAndPassword(sa,u+'@'+DOMAIN,p);await signOut(sa);
+  await setDoc(doc(db,'teachers',cr.user.uid),{name:$('tName').value.trim(),klass:$('tClass').value.trim(),subject:$('tSubj').value.trim(),username:u,role:'Teacher'});
+  msg('teacherMsg','শিক্ষক তৈরি হয়েছে।','ok')}catch(e){msg('teacherMsg',e.message,'err')}}
+
+Object.assign(window,{doLogin,logout,showScreen,loadGrid,saveGrid,loadResult,lookupPublic,loadBulk,loadMerit,onMeClass,openSheet,loadStudents,addStudent,uploadStudents,downloadTemplate,loadFull,saveFull,addTeacher});
+</script></body></html>
